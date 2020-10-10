@@ -1,6 +1,6 @@
 {
   "name": "@yangss/vue3-i18n",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "A simple i18n plugin for Vue3",
   "main": "lib/i18n.js",
   "types": "lib/i18n.d.ts",
@@ -8,7 +8,10 @@
     "build": "tsc",
     "lint": "eslint src/* --fix"
   },
-  "files": ["lib", "src"],
+  "files": [
+    "lib",
+    "src"
+  ],
   "keywords": [
     "vue",
     "vue3",
