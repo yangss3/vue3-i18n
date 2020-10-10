@@ -1,14 +1,27 @@
 {
-  "name": "vue3-i18n",
-  "version": "1.0.0",
-  "description": "",
+  "name": "@yangss/vue3-i18n",
+  "version": "0.0.1",
+  "description": "A simple i18n plugin for Vue3",
   "main": "lib/i18n.js",
   "types": "lib/i18n.d.ts",
   "scripts": {
     "build": "tsc",
     "lint": "eslint src/* --fix"
   },
-  "author": "",
+  "files": ["lib", "src"],
+  "keywords": [
+    "vue",
+    "vue3",
+    "i18n"
+  ],
+  "author": {
+    "name": "Nicholas Yang",
+    "email": "yss_2016@outlook.com"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yangss3/vue3-i18n.git"
+  },
   "license": "ISC",
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "^4.4.0",
@@ -21,5 +34,8 @@
     "eslint-plugin-standard": "^4.0.1",
     "typescript": "^4.0.3",
     "vue": "^3.0.0"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }

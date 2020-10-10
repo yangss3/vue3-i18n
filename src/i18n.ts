@@ -11,19 +11,18 @@ export interface I18nConfig {
 
 export interface I18nInstance {
   messages: Messages;
-  t: (key:string) => string;
+  t: (key: string) => string;
   setLocale: (locale: string) => void;
   getLocale: () => string;
 }
 
-const recursion = (chain: string[], messages: Messages): string => {
+const recursiveRetrieve = (chain: string[], messages: Messages): string => {
   if (!messages[chain[0]]) {
-    console.error('Error(i18n):', 'not found')
-    return ''
+    throw new Error('Not Found')
   } else if (chain.length === 1) {
     return typeof messages[chain[0]] === 'string' ? messages[chain[0]] : ''
   } else {
-    return recursion(chain.slice(1), messages[chain[0]])
+    return recursiveRetrieve(chain.slice(1), messages[chain[0]])
   }
 }
 
@@ -35,7 +34,12 @@ const createI18n = (config: I18nConfig): I18nInstance => {
       console.error('Error(i18n):', 'key must be a type of string')
       return ''
     }
-    return recursion(key.split('.'), messages[locale.value])
+    try {
+      return recursiveRetrieve(key.split('.'), messages[locale.value])
+    } catch (error) {
+      console.error(`Error: the key '${key}' not found`)
+      return ''
+    }
   }
   const setLocale = (loc: string) => { locale.value = loc }
   const getLocale = () => locale.value
