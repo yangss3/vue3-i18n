@@ -10,8 +10,9 @@
     "skipLibCheck": true,
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
-    "sourceMap": true,
-    "baseUrl": "."
+    "sourceMap": false,
+    "baseUrl": ".",
+    "removeComments": true
   },
   "include": [
     "src/**/*.ts",
