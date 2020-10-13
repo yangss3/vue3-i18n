@@ -27,21 +27,27 @@ const recursiveRetrieve = (chain: string[], messages: Messages): string => {
 }
 
 const _createI18n = (config: I18nConfig): I18nInstance => {
-  const locale = ref(config.locale || 'en')
+  const locale = ref(config.locale || 'zh')
   const messages = config.messages
   const t = (key: string) => {
+    const pack = messages[locale.value] || messages.zh
     if (typeof key !== 'string') {
-      console.error('Error(i18n):', 'key must be a type of string')
+      console.warn('Warn(i18n):', 'keypath must be a type of string')
       return ''
     }
     try {
-      return recursiveRetrieve(key.split('.'), messages[locale.value])
+      return recursiveRetrieve(key.split('.'), pack)
     } catch (error) {
-      console.error(`Error: the key '${key}' not found`)
-      return ''
+      console.warn(`Warn(i18n): the keypath '${key}' not found`)
+      return key
     }
   }
-  const setLocale = (loc: string) => { locale.value = loc }
+  const setLocale = (loc: string) => {
+    if (!messages[loc]) {
+      console.warn(`Warn(i18n): the '${loc}' language pack not found, fall back to Chinese language pack`)
+    }
+    locale.value = loc
+  }
   const getLocale = () => locale.value
 
   return {
