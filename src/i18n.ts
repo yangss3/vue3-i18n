@@ -17,7 +17,7 @@ export interface I18nInstance {
 }
 
 const recursiveRetrieve = (chain: string[], messages: Messages): string => {
-  if (!messages[chain[0]]) {
+  if (!messages[chain[0]] && messages[chain[0]] !== '') {
     throw new Error('Not Found')
   } else if (chain.length === 1) {
     return typeof messages[chain[0]] === 'string' ? messages[chain[0]] : ''
