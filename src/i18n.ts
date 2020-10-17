@@ -1,4 +1,4 @@
-import { inject, provide, ref, App, readonly } from 'vue'
+import { inject, provide, ref, App, readonly, reactive } from 'vue'
 
 interface Messages {
   [key: string]: any
@@ -50,13 +50,13 @@ const _createI18n = (config: I18nConfig) => {
   }
   const getLocale = () => locale.value
 
-  return {
-    locale,
+  return reactive({
+    locale: readonly(locale),
     messages,
     t,
     setLocale,
     getLocale
-  }
+  })
 }
 
 
