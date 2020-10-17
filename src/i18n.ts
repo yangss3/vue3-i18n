@@ -1,4 +1,4 @@
-import { inject, provide, ref, App, computed, ComputedRef, readonly, reactive } from 'vue'
+import { inject, provide, ref, App, readonly } from 'vue'
 
 interface Messages {
   [key: string]: any
@@ -50,14 +50,16 @@ const _createI18n = (config: I18nConfig) => {
   }
   const getLocale = () => locale.value
 
-  return reactive({
-    locale,
+  return {
+    locale: readonly(locale),
     messages,
     t,
     setLocale,
     getLocale
-  })
+  }
 }
+
+
 
 const i18nSymbol = Symbol('i18n')
 
@@ -81,6 +83,6 @@ export function provideI18n (config: I18nConfig): void {
   provide(i18nSymbol, _createI18n(config))
 }
 
-export function useI18n ()  {
+export function useI18n () {
   return inject(i18nSymbol)
 }
