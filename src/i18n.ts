@@ -51,7 +51,7 @@ const _createI18n = (config: I18nConfig) => {
   const getLocale = () => locale.value
 
   return reactive({
-    locale: readonly(locale),
+    locale,
     messages,
     t,
     setLocale,
