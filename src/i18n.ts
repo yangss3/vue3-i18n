@@ -1,4 +1,4 @@
-import { inject, provide, ref, App } from 'vue'
+import { inject, provide, ref, App, computed, ComputedRef } from 'vue'
 
 interface Messages {
   [key: string]: any
@@ -11,7 +11,7 @@ export interface I18nConfig {
 
 export interface I18nInstance {
   messages: Messages;
-  t: (key: string) => string;
+  t: ComputedRef<(key: string) => string>;
   setLocale: (locale: string) => void;
   getLocale: () => string;
 }
@@ -29,19 +29,21 @@ const recursiveRetrieve = (chain: string[], messages: Messages): string => {
 const _createI18n = (config: I18nConfig): I18nInstance => {
   const locale = ref(config.locale || 'zh')
   const messages = config.messages
-  const t = (key: string) => {
-    const pack = messages[locale.value] || messages.zh
-    if (typeof key !== 'string') {
-      console.warn('Warn(i18n):', 'keypath must be a type of string')
-      return ''
+  const t = computed(() => {
+    return (key: string) => {
+      const pack = messages[locale.value] || messages.zh
+      if (typeof key !== 'string') {
+        console.warn('Warn(i18n):', 'keypath must be a type of string')
+        return ''
+      }
+      try {
+        return recursiveRetrieve(key.split('.'), pack)
+      } catch (error) {
+        console.warn(`Warn(i18n): the keypath '${key}' not found`)
+        return key
+      }
     }
-    try {
-      return recursiveRetrieve(key.split('.'), pack)
-    } catch (error) {
-      console.warn(`Warn(i18n): the keypath '${key}' not found`)
-      return key
-    }
-  }
+  })
   const setLocale = (loc: string) => {
     if (!messages[loc]) {
       console.warn(`Warn(i18n): the '${loc}' language pack not found, fall back to Chinese language pack`)
