@@ -1,6 +1,6 @@
 {
   "name": "@yangss/vue3-i18n",
-  "version": "0.0.13",
+  "version": "0.0.14",
   "description": "A simple i18n plugin for Vue3",
   "main": "lib/i18n.js",
   "types": "lib/i18n.d.ts",
