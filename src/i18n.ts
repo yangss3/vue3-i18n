@@ -63,13 +63,10 @@ const i18nSymbol: InjectionKey<I18nInstance> = Symbol('i18n')
 
 export function createI18n (config: I18nConfig) {
   const i18n = _createI18n(config)
-  return {
-    i18n,
-    install: (app: App) => {
-      app.provide(i18nSymbol, i18n)
-      app.config.globalProperties.$t = i18n.t
-      app.config.globalProperties.$i18n = i18n
-    }
+  return (app: App) => {
+    app.provide(i18nSymbol, i18n)
+    app.config.globalProperties.$t = i18n.t
+    app.config.globalProperties.$i18n = i18n
   }
 }
 
