@@ -1,4 +1,4 @@
-import { inject, provide, ref, App, readonly, reactive } from 'vue'
+import { inject, provide, ref, App, readonly, reactive, InjectionKey } from 'vue'
 
 interface Messages {
   [key: string]: any
@@ -9,12 +9,12 @@ export interface I18nConfig {
   messages: Messages
 }
 
-// export interface I18nInstance {,
-//   messages: Messages;
-//   t: ComputedRef<(key: string) => string>;
-//   setLocale: (locale: string) => void;
-//   getLocale: () => string;
-// }
+export interface I18nInstance {
+  messages: Messages;
+  t: (key: string) => string;
+  setLocale: (locale: string) => void;
+  getLocale: () => string;
+}
 
 const recursiveRetrieve = (chain: string[], messages: Messages): string => {
   if (!messages[chain[0]] && messages[chain[0]] !== '') {
@@ -26,7 +26,7 @@ const recursiveRetrieve = (chain: string[], messages: Messages): string => {
   }
 }
 
-const _createI18n = (config: I18nConfig) => {
+const _createI18n = (config: I18nConfig): I18nInstance => {
   const locale = ref(config.locale || 'zh')
   const messages = readonly(config.messages)
   const t = (key: string) => {
@@ -50,27 +50,20 @@ const _createI18n = (config: I18nConfig) => {
   }
   const getLocale = () => locale.value
 
-  return reactive({
-    locale: readonly(locale),
+  return {
     messages,
     t,
     setLocale,
     getLocale
-  })
+  }
 }
 
 
-
-const i18nSymbol = Symbol('i18n')
-
-// export default function globalI18n (app: App, config: I18nConfig):void {
-//   const i18n = _createI18n(config)
-//   app.provide(i18nSymbol, i18n)
-//   app.config.globalProperties.$t = i18n.t
-//   app.config.globalProperties.$i18n = i18n
-// }
+const i18nSymbol: InjectionKey<I18nInstance> = Symbol('i18n')
+let i18nConfig: I18nConfig
 
 export function createI18n (config: I18nConfig) {
+  i18nConfig = config
   const i18n = _createI18n(config)
   return (app: App) => {
     app.provide(i18nSymbol, i18n)
@@ -84,5 +77,7 @@ export function provideI18n (config: I18nConfig): void {
 }
 
 export function useI18n () {
-  return inject(i18nSymbol)
+  return inject(i18nSymbol)!
 }
+
+export default () => _createI18n(i18nConfig)
