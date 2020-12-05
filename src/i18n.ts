@@ -1,4 +1,4 @@
-import { inject, provide, ref, App, readonly, reactive, InjectionKey } from 'vue'
+import { inject, provide, ref, App, readonly, InjectionKey } from 'vue'
 
 interface Messages {
   [key: string]: any
@@ -27,10 +27,10 @@ const recursiveRetrieve = (chain: string[], messages: Messages): string => {
 }
 
 const _createI18n = (config: I18nConfig): I18nInstance => {
-  const locale = ref(config.locale || 'zh')
+  const locale = ref(config.locale || 'zh-CN')
   const messages = readonly(config.messages)
   const t = (key: string) => {
-    const pack = messages[locale.value] || messages.zh
+    const pack = messages[locale.value] || messages['zh-CN']
     if (typeof key !== 'string') {
       console.warn('Warn(i18n):', 'keypath must be a type of string')
       return ''
