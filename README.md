@@ -32,7 +32,7 @@ createApp(App).use(i18n).mount('#app')
 ```html
 <template>
   <p>{{$t('hello')}}</p>
-  <button @click="switchLanguage">switch<button/>
+  <button @click="switchLanguage">switch</button>
 </template>
 
 <script>
