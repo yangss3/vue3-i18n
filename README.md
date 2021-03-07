@@ -15,6 +15,7 @@ import { createI18n } from '@yangss/vue3-i18n'
 
 const i18n = createI18n({
   locale: 'zhCN',
+  fallbackLocale: 'zhCN',
   messages: {
     'zhCN': {
       hello: '你好',
