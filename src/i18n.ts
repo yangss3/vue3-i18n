@@ -1,4 +1,4 @@
-import { inject, provide, ref, App, readonly, InjectionKey } from 'vue'
+import { inject, provide, ref, App, readonly, InjectionKey, ComputedRef, computed, WritableComputedRef } from 'vue'
 
 interface Messages {
   [key: string]: any
@@ -11,9 +11,9 @@ export interface I18nConfig {
 
 export interface I18nInstance {
   messages: Messages;
-  t: (key: string) => string;
-  setLocale: (locale: string) => void;
-  getLocale: () => string;
+  t: (key: string) => ComputedRef<string>;
+  $t: (key: string) => string;
+  locale: WritableComputedRef<string>;
 }
 
 const recursiveRetrieve = (chain: string[], messages: Messages): string => {
@@ -27,37 +27,41 @@ const recursiveRetrieve = (chain: string[], messages: Messages): string => {
 }
 
 const _createI18n = (config: I18nConfig): I18nInstance => {
-  const locale = ref(config.locale || 'zh-CN')
   const messages = readonly(config.messages)
-  const t = (key: string) => {
-    const pack = messages[locale.value] || messages['zh-CN']
+  const _locale = ref(config.locale || 'zh-CN')
+  const locale = computed({
+    get: () => _locale.value,
+    set: (loc: string) => {
+      if (!messages[loc]) {
+        console.warn(`Warn(i18n): the '${loc}' language pack not found, fall back to Chinese language pack`)
+      }
+      _locale.value = loc
+    }
+  })
+
+  const _t = (key: string) => {
+    const pack = messages[locale.value]
+    let translation = ''
     if (typeof key !== 'string') {
       console.warn('Warn(i18n):', 'keypath must be a type of string')
-      return ''
+    } else {
+      try {
+        translation = recursiveRetrieve(key.split('.'), pack)
+      } catch (error) {
+        console.warn(`Warn(i18n): the keypath '${key}' not found`)
+        translation = key
+      }
     }
-    try {
-      return recursiveRetrieve(key.split('.'), pack)
-    } catch (error) {
-      console.warn(`Warn(i18n): the keypath '${key}' not found`)
-      return key
-    }
+    return translation
   }
-  const setLocale = (loc: string) => {
-    if (!messages[loc]) {
-      console.warn(`Warn(i18n): the '${loc}' language pack not found, fall back to Chinese language pack`)
-    }
-    locale.value = loc
-  }
-  const getLocale = () => locale.value
 
   return {
     messages,
-    t,
-    setLocale,
-    getLocale
+    t: (key:string) => computed(() => _t(key)),
+    $t: _t,
+    locale
   }
 }
-
 
 const i18nSymbol: InjectionKey<I18nInstance> = Symbol('i18n')
 
@@ -65,7 +69,7 @@ export function createI18n (config: I18nConfig) {
   const i18n = _createI18n(config)
   return (app: App) => {
     app.provide(i18nSymbol, i18n)
-    app.config.globalProperties.$t = i18n.t
+    app.config.globalProperties.$t = i18n.$t
     app.config.globalProperties.$i18n = i18n
   }
 }
