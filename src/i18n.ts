@@ -1,18 +1,18 @@
-import { inject, provide, ref, App, readonly, InjectionKey, ComputedRef, computed, WritableComputedRef } from 'vue'
+import { inject, provide, ref, App, readonly, InjectionKey, computed, WritableComputedRef } from 'vue'
 
 interface Messages {
-  [key: string]: any
+  [key: string]: any;
 }
 
-export interface I18nConfig {
-  locale?: string
-  messages: Messages
+export interface I18nConfig{
+  locale: string;
+  fallbackLocale?: string;
+  messages: Messages;
 }
 
 export interface I18nInstance {
   messages: Messages;
-  t: (key: string) => ComputedRef<string>;
-  $t: (key: string) => string;
+  t: (key: string) => string;
   locale: WritableComputedRef<string>;
 }
 
@@ -28,19 +28,24 @@ const recursiveRetrieve = (chain: string[], messages: Messages): string => {
 
 const _createI18n = (config: I18nConfig): I18nInstance => {
   const messages = readonly(config.messages)
-  const _locale = ref(config.locale || 'zh-CN')
+  const _locale = ref(config.locale)
   const locale = computed({
     get: () => _locale.value,
     set: (loc: string) => {
       if (!messages[loc]) {
-        console.warn(`Warn(i18n): the '${loc}' language pack not found, fall back to Chinese language pack`)
+        if (config.fallbackLocale) {
+          console.warn(`Warn(i18n): the '${loc}' language pack not found, fall back to ${config.fallbackLocale} language pack`)
+        } else {
+          console.error(`Error(i18n): the '${loc}' language pack not found`)
+        }
       }
       _locale.value = loc
     }
   })
 
-  const _t = (key: string) => {
-    const pack = messages[locale.value]
+  const t = (key: string) => {
+    const pack = messages[locale.value] ||
+      (config.fallbackLocale ? messages[config.fallbackLocale] : {})
     let translation = ''
     if (typeof key !== 'string') {
       console.warn('Warn(i18n):', 'keypath must be a type of string')
@@ -57,8 +62,7 @@ const _createI18n = (config: I18nConfig): I18nInstance => {
 
   return {
     messages,
-    t: (key:string) => computed(() => _t(key)),
-    $t: _t,
+    t,
     locale
   }
 }
@@ -69,7 +73,7 @@ export function createI18n (config: I18nConfig) {
   const i18n = _createI18n(config)
   return (app: App) => {
     app.provide(i18nSymbol, i18n)
-    app.config.globalProperties.$t = i18n.$t
+    app.config.globalProperties.$t = i18n.t
     app.config.globalProperties.$i18n = i18n
   }
 }
