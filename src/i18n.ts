@@ -85,3 +85,21 @@ export function provideI18n (config: I18nConfig): void {
 export function useI18n () {
   return inject(i18nSymbol)!
 }
+
+export function createI18nRaw ({ messages, locale, fallbackLocale }: I18nConfig) {
+  return (key: string) => {
+    const pack = messages[locale] || (fallbackLocale ? messages[fallbackLocale] : {})
+    let translation = ''
+    if (typeof key !== 'string') {
+      console.warn('Warn(i18n):', 'keypath must be a type of string')
+    } else {
+      try {
+        translation = recursiveRetrieve(key.split('.'), pack)
+      } catch (error) {
+        console.warn(`Warn(i18n): the keypath '${key}' not found`)
+        translation = key
+      }
+    }
+    return translation
+  }
+}
