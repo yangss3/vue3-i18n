@@ -67,26 +67,7 @@ const _createI18n = (config: I18nConfig): I18nInstance => {
   }
 }
 
-const i18nSymbol: InjectionKey<I18nInstance> = Symbol('i18n')
-
-export function createI18n (config: I18nConfig) {
-  const i18n = _createI18n(config)
-  return (app: App) => {
-    app.provide(i18nSymbol, i18n)
-    app.config.globalProperties.$t = i18n.t
-    app.config.globalProperties.$i18n = i18n
-  }
-}
-
-export function provideI18n (config: I18nConfig): void {
-  provide(i18nSymbol, _createI18n(config))
-}
-
-export function useI18n () {
-  return inject(i18nSymbol)!
-}
-
-export function createI18nRaw ({ messages, locale, fallbackLocale }: I18nConfig) {
+const _createT = ({ messages, locale, fallbackLocale }: I18nConfig) => {
   return (key: string) => {
     const pack = messages[locale] || (fallbackLocale ? messages[fallbackLocale] : {})
     let translation = ''
@@ -102,4 +83,26 @@ export function createI18nRaw ({ messages, locale, fallbackLocale }: I18nConfig)
     }
     return translation
   }
+}
+
+const i18nSymbol: InjectionKey<I18nInstance> = Symbol('i18n')
+
+export function createI18n (config: I18nConfig) {
+  const _i18n = _createI18n(config)
+  return {
+    i18n: (app: App) => {
+      app.provide(i18nSymbol, _i18n)
+      app.config.globalProperties.$t = _i18n.t
+      app.config.globalProperties.$i18n = _i18n
+    },
+    t: _createT(config)
+  }
+}
+
+export function provideI18n (config: I18nConfig): void {
+  provide(i18nSymbol, _createI18n(config))
+}
+
+export function useI18n () {
+  return inject(i18nSymbol)!
 }
