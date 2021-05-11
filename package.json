@@ -7,7 +7,9 @@
   "scripts": {
     "build": "tsc",
     "lint": "eslint src/* --fix",
-    "patch-publish": "npm run build && npm version patch"
+    "patch": "npm version patch && npm run build && npm publish",
+    "minor": "npm version minor && npm run build && npm publish",
+    "major": "npm version major && npm run build && npm publish"
   },
   "files": [
     "lib"
