@@ -6,7 +6,8 @@
   "types": "lib/i18n.d.ts",
   "scripts": {
     "build": "tsc",
-    "lint": "eslint src/* --fix"
+    "lint": "eslint src/* --fix",
+    "patch-publish": "npm run build && npm version patch"
   },
   "files": [
     "lib"
