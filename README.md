@@ -53,7 +53,7 @@ export default {
 }
 </script>
 ```
-注意，`useI18n` 属于composition API，只能在 `setup` 的上下文中调用。如果要在其它地方进行多语言转换，可以使用普通版本的的 `t` 函数：
+`useI18n` 属于 composition API，只能在 `setup` 上下文中执行。如果要在非`setup`环境下进行多语言转换，可以使用普通版本的的 `t` 函数：
 
 ```js
 // i18n.js
@@ -83,7 +83,7 @@ import { createApp } from 'vue'
 import { i18n } from './i18n.js'
 createApp(App).use(i18n) .mount('#app')
 
-// anything.js
+// use-in-no-setup.js
 // 使用普通函数版本
 import { t } from './i18n.js'
 console.log(t('hello'))
