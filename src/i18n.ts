@@ -3,8 +3,9 @@ import { inject, provide, ref, App, readonly, InjectionKey, computed, WritableCo
 interface Pack {
   [key: string]: string | Pack
 }
+
 interface Messages {
-  [loc: string]: Pack
+  [key: string]: Pack
 }
 
 export interface I18nConfig{
@@ -15,7 +16,7 @@ export interface I18nConfig{
 
 export interface I18nInstance {
   messages: Messages;
-  t: (key: string, payload?: Record<string, string>) => string;
+  t: (key: string, payload?: Record<string, unknown>) => string;
   locale: WritableComputedRef<string>;
 }
 
@@ -29,7 +30,7 @@ const recursiveRetrieve = (chain: string[], pack: Pack): string => {
   }
 }
 
-function translate (pack: Pack, key: string, payload?: Record<string, string>) {
+function translate (pack: Pack, key: string, payload?: Record<string, unknown>) {
   let translation = ''
   if (typeof key !== 'string') {
     console.warn('Warn(i18n):', 'keypath must be a type of string')
@@ -39,13 +40,13 @@ function translate (pack: Pack, key: string, payload?: Record<string, string>) {
       if (payload) {
         translation = Object.keys(payload).reduce((prev, cur) => {
           const regex = new RegExp(`\\{${cur}\\}`, 'g')
-          return prev.replace(regex, payload[cur])
+          return prev.replace(regex, String(payload[cur]))
         }, res)
       } else {
         translation = res
       }
     } catch (error) {
-      console.warn(`Warn(i18n): the keypath '${key}' not found`)
+      console.warn(`Warn(i18n): the keypath '${key}' does not exist`)
       translation = key
     }
   }
@@ -60,18 +61,17 @@ const _createI18n = (config: I18nConfig): I18nInstance => {
     set: (loc: string) => {
       if (!messages[loc]) {
         if (config.fallbackLocale) {
-          console.warn(`Warn(i18n): the '${loc}' language pack not found, fall back to ${config.fallbackLocale} language pack`)
+          console.warn(`Warn(i18n): the '${loc}' language pack does not exist, fall back to ${config.fallbackLocale} language pack`)
         } else {
-          console.error(`Error(i18n): the '${loc}' language pack not found`)
+          console.error(`Error(i18n): the '${loc}' language pack does not exist`)
         }
       }
       _locale.value = loc
     }
   })
 
-  const t = (key: string, payload?: Record<string, string>) => {
-    const pack = messages[locale.value] ||
-      (config.fallbackLocale ? messages[config.fallbackLocale] : {})
+  const t = (key: string, payload?: Record<string, unknown>) => {
+    const pack = messages[locale.value] || (config.fallbackLocale ? messages[config.fallbackLocale] : {})
     return translate(pack, key, payload)
   }
   return { messages, t, locale }
@@ -89,7 +89,7 @@ export function createI18n (config: I18nConfig) {
       app.config.globalProperties.$t = _i18n.t
       app.config.globalProperties.$i18n = _i18n
     },
-    t: (key: string, payload?: Record<string, string>) => translate(pack, key, payload)
+    t: (key: string, payload?: Record<string, unknown>) => translate(pack, key, payload)
   }
 }
 
