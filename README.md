@@ -53,7 +53,7 @@ export default {
 }
 </script>
 ```
-`useI18n` 属于 composition API，只能在 `setup` 上下文中执行。如果要在非`setup`环境下进行多语言转换，可以使用普通版本的的 `t` 函数：
+`useI18n` 属于 composition API，只能在 `setup` 上下文中执行。如果要在非`setup`环境下进行多语言转换，可以使用普通版本的 `t` 函数：
 
 ```js
 // i18n.js
