@@ -15,7 +15,7 @@ export interface I18nConfig{
 
 export interface I18nInstance {
   messages: Messages;
-  t: (key: string) => string;
+  t: (key: string, payload?: Record<string, string>) => string;
   locale: WritableComputedRef<string>;
 }
 
