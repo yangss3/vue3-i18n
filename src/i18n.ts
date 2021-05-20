@@ -1,7 +1,10 @@
 import { inject, provide, ref, App, readonly, InjectionKey, computed, WritableComputedRef } from 'vue'
 
+interface Pack {
+  [key: string]: string | Pack
+}
 interface Messages {
-  [key: string]: any;
+  [loc: string]: Pack
 }
 
 export interface I18nConfig{
@@ -16,14 +19,37 @@ export interface I18nInstance {
   locale: WritableComputedRef<string>;
 }
 
-const recursiveRetrieve = (chain: string[], messages: Messages): string => {
-  if (!messages[chain[0]] && messages[chain[0]] !== '') {
+const recursiveRetrieve = (chain: string[], pack: Pack): string => {
+  if (!pack[chain[0]] && pack[chain[0]] !== '') {
     throw new Error('Not Found')
   } else if (chain.length === 1) {
-    return typeof messages[chain[0]] === 'string' ? messages[chain[0]] : ''
+    return typeof pack[chain[0]] === 'string' ? pack[chain[0]] as string : ''
   } else {
-    return recursiveRetrieve(chain.slice(1), messages[chain[0]])
+    return recursiveRetrieve(chain.slice(1), pack[chain[0]] as Pack)
   }
+}
+
+function translate (pack: Pack, key: string, payload?: Record<string, string>) {
+  let translation = ''
+  if (typeof key !== 'string') {
+    console.warn('Warn(i18n):', 'keypath must be a type of string')
+  } else {
+    try {
+      const res = recursiveRetrieve(key.split('.'), pack)
+      if (payload) {
+        translation = Object.keys(payload).reduce((prev, cur) => {
+          const regex = new RegExp(`\\{${cur}\\}`, 'g')
+          return prev.replace(regex, payload[cur])
+        }, res)
+      } else {
+        translation = res
+      }
+    } catch (error) {
+      console.warn(`Warn(i18n): the keypath '${key}' not found`)
+      translation = key
+    }
+  }
+  return translation
 }
 
 const _createI18n = (config: I18nConfig): I18nInstance => {
@@ -43,59 +69,27 @@ const _createI18n = (config: I18nConfig): I18nInstance => {
     }
   })
 
-  const t = (key: string) => {
+  const t = (key: string, payload?: Record<string, string>) => {
     const pack = messages[locale.value] ||
       (config.fallbackLocale ? messages[config.fallbackLocale] : {})
-    let translation = ''
-    if (typeof key !== 'string') {
-      console.warn('Warn(i18n):', 'keypath must be a type of string')
-    } else {
-      try {
-        translation = recursiveRetrieve(key.split('.'), pack)
-      } catch (error) {
-        console.warn(`Warn(i18n): the keypath '${key}' not found`)
-        translation = key
-      }
-    }
-    return translation
+    return translate(pack, key, payload)
   }
-
-  return {
-    messages,
-    t,
-    locale
-  }
-}
-
-const _createT = ({ messages, locale, fallbackLocale }: I18nConfig) => {
-  return (key: string) => {
-    const pack = messages[locale] || (fallbackLocale ? messages[fallbackLocale] : {})
-    let translation = ''
-    if (typeof key !== 'string') {
-      console.warn('Warn(i18n):', 'keypath must be a type of string')
-    } else {
-      try {
-        translation = recursiveRetrieve(key.split('.'), pack)
-      } catch (error) {
-        console.warn(`Warn(i18n): the keypath '${key}' not found`)
-        translation = key
-      }
-    }
-    return translation
-  }
+  return { messages, t, locale }
 }
 
 const i18nSymbol: InjectionKey<I18nInstance> = Symbol('i18n')
 
 export function createI18n (config: I18nConfig) {
   const _i18n = _createI18n(config)
+  const { messages, locale, fallbackLocale } = config
+  const pack = messages[locale] || (fallbackLocale ? messages[fallbackLocale] : {})
   return {
     i18n: (app: App) => {
       app.provide(i18nSymbol, _i18n)
       app.config.globalProperties.$t = _i18n.t
       app.config.globalProperties.$i18n = _i18n
     },
-    t: _createT(config)
+    t: (key: string, payload?: Record<string, string>) => translate(pack, key, payload)
   }
 }
 
