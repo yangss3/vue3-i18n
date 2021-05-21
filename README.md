@@ -21,11 +21,13 @@ const { i18n } = createI18n({
       hello: '你好',
       usa: '美国',
       china: '中国',
+      introduction: `我叫{name}, 今天{age}岁`
     },
     'enUS': {
       hello: 'Hello',
       usa: 'America',
       china: 'China',
+      introduction: `My name is {name}, I'm {age} years old`
     }
   }
 })
@@ -38,6 +40,8 @@ createApp(App).use(i18n).mount('#app')
   <button @click="switchLanguage">switch</button>
   <p>{{ $t('hello') }}</p>
   <p v-for="country in countries" :key="country">{{ country }}</p>
+  <!-- 使用变量 >=0.8.0 -->
+  <p>{{ $t('introduction', { name: 'Jack', age: 25 }) }}</p>
 </template>
 
 <script>
