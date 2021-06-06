@@ -13,7 +13,7 @@ import App from './App.vue'
 import { createApp } from 'vue'
 import { createI18n } from '@yangss/vue3-i18n'
 
-const { i18n } = createI18n({
+const i18n = createI18n({
   locale: 'zhCN',
   fallbackLocale: 'zhCN',
   messages: {
@@ -21,7 +21,7 @@ const { i18n } = createI18n({
       hello: '你好',
       usa: '美国',
       china: '中国',
-      introduction: `我叫{name}, 今天{age}岁`
+      introduction: `我叫{name}, 今年{age}岁`
     },
     'enUS': {
       hello: 'Hello',
@@ -40,7 +40,7 @@ createApp(App).use(i18n).mount('#app')
   <button @click="switchLanguage">switch</button>
   <p>{{ $t('hello') }}</p>
   <p v-for="country in countries" :key="country">{{ country }}</p>
-  <!-- 使用变量 >=0.8.0 -->
+  <!-- 使用变量 >=1.1.0 -->
   <p>{{ $t('introduction', { name: 'Jack', age: 25 }) }}</p>
 </template>
 
@@ -57,12 +57,12 @@ export default {
 }
 </script>
 ```
-`useI18n` 属于 composition API，只能在 `setup` 上下文中执行。如果要在非`setup`环境下进行多语言转换，可以使用普通版本的 `t` 函数：
+`useI18n` 属于 composition API，只能在 `setup` 上下文中执行。如果要在非 `setup` 环境下进行多语言转换，可以导出 i18n 实例对象，并直接调用实例上的 `t` 方法：
 
 ```js
 // i18n.js
 import { createI18n } from '@yangss/vue3-i18n'
-const { i18n, t } = createI18n({
+const { install, i18n } = createI18n({
   locale: 'zhCN',
   fallbackLocale: 'zhCN',
   messages: {
@@ -78,17 +78,18 @@ const { i18n, t } = createI18n({
     }
   }
 })
-export { i18n, t }
+export default install
+export const t = i18n.t
 
 // main.js
 // 注册 composition API
 import App from './App.vue'
 import { createApp } from 'vue'
-import { i18n } from './i18n.js'
+import i18n from './i18n.js'
 createApp(App).use(i18n) .mount('#app')
 
 // use-in-no-setup.js
-// 使用普通函数版本
+// 直接使用 t 函数
 import { t } from './i18n.js'
 console.log(t('hello'))
 ```
