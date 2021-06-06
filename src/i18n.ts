@@ -1,4 +1,4 @@
-import { inject, provide, ref, App, readonly, InjectionKey, computed, WritableComputedRef } from 'vue'
+import { inject, ref, App, readonly, InjectionKey, computed, WritableComputedRef } from 'vue'
 
 interface Pack {
   [key: string]: string | Pack
@@ -8,7 +8,7 @@ interface Messages {
   [key: string]: Pack
 }
 
-export interface I18nConfig{
+export interface I18nConfig {
   locale: string;
   fallbackLocale?: string;
   messages: Messages;
