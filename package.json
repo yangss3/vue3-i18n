@@ -3,7 +3,7 @@
   "version": "1.1.1",
   "description": "A simple i18n plugin for Vue3",
   "main": "lib/i18n.cjs.js",
-  "module": "lib/i8n.esm.js",
+  "module": "lib/i18n.esm.js",
   "types": "lib/i18n.d.ts",
   "scripts": {
     "build": "npm run build-cjs && npm run build-esm && node script/generate.js",
