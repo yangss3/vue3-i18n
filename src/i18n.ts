@@ -85,6 +85,7 @@ export function createI18n (config: I18nConfig) {
     install: (app: App) => {
       app.provide(i18nSymbol, i18n)
       app.config.globalProperties.$t = i18n.t
+      app.config.globalProperties.$locale = i18n.locale
       app.config.globalProperties.$i18n = i18n
     },
     i18n
@@ -93,4 +94,12 @@ export function createI18n (config: I18nConfig) {
 
 export function useI18n () {
   return inject(i18nSymbol)!
+}
+
+declare module '@vue/runtime-core' {
+  export interface ComponentCustomProperties {
+    $i18n: I18nInstance
+    $t: I18nInstance['t']
+    $locale: I18nInstance['locale']
+  }
 }
